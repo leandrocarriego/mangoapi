@@ -1,0 +1,23 @@
+<!-- mangoapi/templates/swagger.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MangoAPI Docs</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist/swagger-ui.css">
+  <style>
+    html, body { margin: 0; padding: 0; }
+    #swagger-ui { height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist/swagger-ui-bundle.js"></script>
+  <script>
+    const ui = SwaggerUIBundle({
+      url: "/openapi.json",
+      dom_id: '#swagger-ui',
+    });
+  </script>
+</body>
+</html>
