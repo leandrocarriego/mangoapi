@@ -90,6 +90,16 @@ async def say_hello(name: str = "world"):
     return {"message": f"Hello {name} 👋"}
 ````
 
+6- Run the app
+```bash
+mangoapi run
+````
+
+7- Test
+```bash
+GET http://localhost:8000/api/hello/?name=Mango
+````
+
 ---
 
 ## 👤 Author

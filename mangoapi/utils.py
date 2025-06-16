@@ -2,6 +2,8 @@
 import inspect
 
 from starlette.requests import Request
+from starlette.responses import JSONResponse
+from pydantic import BaseModel, ValidationError
 
 
 async def parse_args(func, request: Request):
@@ -15,41 +17,33 @@ async def parse_args(func, request: Request):
     sig = inspect.signature(func)
     kwargs = {}
 
-    # Query params siempre están disponibles
-    # Query params are always available
-    query_params = request.query_params
-    print("DEBUG query_params:", dict(query_params))
-
-    # Para métodos que pueden llevar body, parseamos JSON o form
-    # For methods that can carry a body, parse JSON or form data
-    body = {}
+    # Extraer body si aplica
+    body_data = {}
     if request.method in ("POST", "PUT", "PATCH"):
-        # Intentamos leer JSON
-        # Try to read JSON body
         try:
-            body = await request.json()
+            body_data = await request.json()
         except Exception:
-            # Si no es JSON, intentamos form data
-            # If not JSON, try form data
             try:
                 form = await request.form()
-                body = dict(form)
+                body_data = dict(form)
             except Exception:
-                body = {}
+                body_data = {}
 
     for name, param in sig.parameters.items():
         if name == "request":
             kwargs[name] = request
+        elif inspect.isclass(param.annotation) and issubclass(param.annotation, BaseModel):
+            kwargs[name] = param.annotation(**body_data)
         else:
-            val = query_params.get(name, None)
+            val = request.query_params.get(name)
             if val is not None:
                 kwargs[name] = val
-            elif body and name in body:
-                kwargs[name] = body[name]
+            elif name in body_data:
+                kwargs[name] = body_data[name]
+            elif param.default != inspect._empty:
+                kwargs[name] = param.default
             else:
-                kwargs[name] = (
-                    param.default if param.default != inspect._empty else None
-                )
+                kwargs[name] = None
 
     return kwargs
 
