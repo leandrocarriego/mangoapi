@@ -1,7 +1,4 @@
 # mangoapi/app.py
-import os
-
-import django
 from django.core.asgi import get_asgi_application
 from starlette.routing import Mount
 from starlette.applications import Starlette
@@ -12,19 +9,7 @@ from mangoapi.router import Router
 
 
 class MangoAPI:
-    """
-    Clase que integra MangoAPI (Starlette) con Django,
-    montando MangoAPI en `api_prefix` y Django en la raíz.
-
-    Permite agregar rutas estilo FastAPI y mantener el admin y ORM Django.
-    """
-
     def __init__(self, api_prefix="/api"):
-        os.environ.setdefault(
-            "DJANGO_SETTINGS_MODULE",
-            os.getenv("DJANGO_SETTINGS_MODULE", "project.settings"),
-        )
-        django.setup()
         self.django_app = get_asgi_application()
 
         self.router = Router()
@@ -53,7 +38,7 @@ class MangoAPI:
 
     def include_router(self, other_router: Router):
         self.router.include_router(other_router)
-        self._build_app()  # reconstruir para actualizar rutas
+        self._build_app()
 
     async def __call__(self, scope, receive, send):
         if self._starlette_app is None:

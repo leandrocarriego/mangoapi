@@ -27,6 +27,9 @@ def run():
     import sys
     sys.path.insert(0, current_dir)
 
+    import django
+    django.setup()
+
     uvicorn.run(f"{project_name}.asgi:application", host="0.0.0.0", port=8000, reload=True)
 
 

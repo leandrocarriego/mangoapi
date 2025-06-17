@@ -2,19 +2,15 @@
 import inspect
 
 from starlette.requests import Request
-from starlette.responses import JSONResponse
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 
 async def parse_args(func, request: Request):
     """
     ES: Extrae los argumentos para la función `func` desde el request ASGI,
-    soportando query params, body JSON y form data según el método HTTP.
-
-    IN: Extracts arguments for the function `func` from the ASGI request,
-    supporting query parameters, JSON body, and form data depending on the HTTP method.
+    incluyendo path params, query params, body JSON y form data.
     """
-    sig = inspect.signature(func)
+    signature = inspect.signature(func)
     kwargs = {}
 
     # Extraer body si aplica
@@ -29,23 +25,31 @@ async def parse_args(func, request: Request):
             except Exception:
                 body_data = {}
 
-    for name, param in sig.parameters.items():
+    for name, param in signature.parameters.items():
         if name == "request":
             kwargs[name] = request
         elif inspect.isclass(param.annotation) and issubclass(param.annotation, BaseModel):
             kwargs[name] = param.annotation(**body_data)
+        elif name in request.path_params:
+            # 🟢 Soporte para path parameters
+            val = request.path_params[name]
+            if param.annotation != inspect._empty:
+                try:
+                    val = param.annotation(val)  # casteo automático si es posible
+                except Exception:
+                    pass
+            kwargs[name] = val
+        elif name in request.query_params:
+            kwargs[name] = request.query_params[name]
+        elif name in body_data:
+            kwargs[name] = body_data[name]
+        elif param.default != inspect._empty:
+            kwargs[name] = param.default
         else:
-            val = request.query_params.get(name)
-            if val is not None:
-                kwargs[name] = val
-            elif name in body_data:
-                kwargs[name] = body_data[name]
-            elif param.default != inspect._empty:
-                kwargs[name] = param.default
-            else:
-                kwargs[name] = None
+            kwargs[name] = None
 
     return kwargs
+
 
 
 async def call_view(func, **kwargs):
@@ -59,3 +63,15 @@ async def call_view(func, **kwargs):
     Returns the function's result.
     """
     return await func(**kwargs)
+
+# # async def call_view(view_func, **kwargs):
+#     if iscoroutinefunction(view_func):
+#         result = await view_func(**kwargs)
+#     else:
+#         result = await sync_to_async(view_func)(**kwargs)
+
+#     # If it returns a queryset and it hasn't been evaluated yet, 
+#     # we convert it to a list asynchronously
+#     if isinstance(result, QuerySet):
+#         return await sync_to_async(list)(result)
+#     return result
