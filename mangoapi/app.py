@@ -5,8 +5,12 @@ from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
+from mangoapi.exceptions import MangoAPIError
+from mangoapi.logging import setup_logger
 from mangoapi.router import Router
 
+
+logger = setup_logger()
 
 class MangoAPI:
     def __init__(self, api_prefix="/api"):
@@ -19,22 +23,20 @@ class MangoAPI:
         self._build_app()
 
     def _build_app(self):
-        starlette_routes = self.router.to_starlette_routes()
-        mangoapi_app = Starlette(
-            routes=starlette_routes,
-            middleware=[Middleware(CORSMiddleware, allow_origins=["*"])],
-        )
-        routes = [
-            Mount(self.api_prefix, app=mangoapi_app),
-            Mount("/", app=self.django_app),
-        ]
-        self._starlette_app = Starlette(routes=routes)
-
-    def get(self, path, status_code=200):
-        return self.router.get(path, status_code)
-
-    def post(self, path, status_code=200):
-        return self.router.post(path, status_code)
+        try:
+            starlette_routes = self.router.to_starlette_routes()
+            mangoapi_app = Starlette(
+                routes=starlette_routes,
+                middleware=[Middleware(CORSMiddleware, allow_origins=["*"])],
+            )
+            routes = [
+                Mount(self.api_prefix, app=mangoapi_app),
+                Mount("/", app=self.django_app),
+            ]
+            self._starlette_app = Starlette(routes=routes)
+        except Exception as e:
+            logger.exception("Error while building MangoAPI app.")
+            raise MangoAPIError()
 
     def include_router(self, other_router: Router):
         self.router.include_router(other_router)

@@ -28,7 +28,9 @@ async def parse_args(func, request: Request):
     for name, param in signature.parameters.items():
         if name == "request":
             kwargs[name] = request
-        elif inspect.isclass(param.annotation) and issubclass(param.annotation, BaseModel):
+        elif inspect.isclass(param.annotation) and issubclass(
+            param.annotation, BaseModel
+        ):
             kwargs[name] = param.annotation(**body_data)
         elif name in request.path_params:
             # 🟢 Soporte para path parameters
@@ -51,7 +53,6 @@ async def parse_args(func, request: Request):
     return kwargs
 
 
-
 async def call_view(func, **kwargs):
     """
     ES: Ejecuta la función `func` con los argumentos `kwargs`.
@@ -64,14 +65,6 @@ async def call_view(func, **kwargs):
     """
     return await func(**kwargs)
 
-# # async def call_view(view_func, **kwargs):
-#     if iscoroutinefunction(view_func):
-#         result = await view_func(**kwargs)
-#     else:
-#         result = await sync_to_async(view_func)(**kwargs)
 
-#     # If it returns a queryset and it hasn't been evaluated yet, 
-#     # we convert it to a list asynchronously
-#     if isinstance(result, QuerySet):
-#         return await sync_to_async(list)(result)
-#     return result
+def is_type(tp: type) -> bool:
+    return isinstance(tp, type)
