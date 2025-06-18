@@ -33,7 +33,7 @@ class Router:
 
         return decorator
 
-    def post(self, path, status_code=200):
+    def post(self, path, status_code=201):
         def decorator(func):
             full_path = f"{self.prefix}/{path.lstrip('/')}".rstrip("/")
             func.__status_code__ = status_code
@@ -41,6 +41,25 @@ class Router:
             return func
 
         return decorator
+
+    def put(self, path, status_code=200):
+        def decorator(func):
+            full_path = f"{self.prefix}/{path.lstrip('/')}".rstrip("/")
+            func.__status_code__ = status_code
+            self.routes.append((full_path, "PUT", func))
+            return func
+
+        return decorator
+    
+    def delete(self, path, status_code=204):
+        def decorator(func):
+            full_path = f"{self.prefix}/{path.lstrip('/')}".rstrip("/")
+            func.__status_code__ = status_code
+            self.routes.append((full_path, "DELETE", func))
+            return func
+
+        return decorator
+
 
     def include_router(self, router: "Router") -> None:
         for path, method, func in router.routes:
@@ -73,7 +92,9 @@ class Router:
                 return JSONResponse({"error": str(e)}, status_code=404)
 
             except ValidationError as e:
-                logger.error("[ValidationError] Return value does not match annotation:")
+                logger.error(
+                    "[ValidationError] Return value does not match annotation:"
+                )
                 for err in e.errors():
                     logger.error(f" - {err['loc']}: {err['msg']}")
                 return JSONResponse({"errors": e.errors()}, status_code=422)
@@ -105,6 +126,9 @@ class Router:
         - Supports lists and individual instances of Pydantic models and Django models.
         - Falls back to returning raw data if no rule matches.
         """
+
+        if return_annotation is None:
+            return {}
 
         origin = get_origin(return_annotation)
         args = get_args(return_annotation)
@@ -153,7 +177,9 @@ class Router:
 
         expects_pydantic_model = issubclass(expected_type, PydanticModel)
         if expects_pydantic_model:
-            model_is_pydantic = isinstance(model, PydanticModel) or isinstance(model, dict)
+            model_is_pydantic = isinstance(model, PydanticModel) or isinstance(
+                model, dict
+            )
             if not model_is_pydantic:
                 raise TypeError(
                     f"Expected a Pydantic model of type {expected_type.__name__}, got {type(model).__name__}"
