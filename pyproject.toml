@@ -37,3 +37,6 @@ Issues = "https://github.com/leandrocariego/mangoapi/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+
+[project.scripts]
+mangoapi = "mangoapi.cli:main"
