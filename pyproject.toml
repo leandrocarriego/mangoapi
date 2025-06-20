@@ -3,7 +3,7 @@ requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mangoapi"
+name = "mangoapi-framework"
 version = "0.1.0"
 description = "Modern lightweight framework for building async APIs on top of Django"
 authors = [

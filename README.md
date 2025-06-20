@@ -34,7 +34,7 @@ Because you want the best of both worlds:
 ## ⚙️ Installation
 
 ```bash
-pip install mangoapi
+pip install mangoapi-framework
 ````
 
 ---
@@ -110,4 +110,4 @@ Built by Leandro Carriego(https://github.com/leandrocarriego)
 
 ## 📄 License
 
-[MIT](LICENSE)
+[Apache-2.0](LICENSE)
