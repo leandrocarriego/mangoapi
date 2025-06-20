@@ -1,3 +1,39 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "mangoapi"
+version = "0.1.0"
+description = "Modern lightweight framework for building async APIs on top of Django"
+authors = [
+  { name = "Leandro Carriego", email = "leandro.carriego@mendrisoftware.com" }
+]
+readme = "README.md"
+license = { text = "Apache-2.0" }
+keywords = ["django", "api", "framework", "fastapi", "asgi", "metaframework"]
+requires-python = ">=3.11"
+
+dependencies = [
+  "django>=4.2",
+  "pydantic>=2.0",
+  "uvicorn>=0.34.3",
+  "starlette>=0.47.0",
+  "colorlog>=6.9.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "black",
+  "ruff",
+  "pre-commit"
+]
+
+[project.urls]
+Homepage = "https://github.com/leandrocariego/mangoapi"
+Repository = "https://github.com/leandrocariego/mangoapi"
+Issues = "https://github.com/leandrocariego/mangoapi/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
