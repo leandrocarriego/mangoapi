@@ -73,7 +73,8 @@ app.include_router(hello_router)
 
 5- Delete all in asgi.py and add te MangoAPI app inside:
 ```python
-from mangoapi_demo.api import app
+# project/asgi.py
+from project.api import app
 
 application = app
 ````
@@ -86,9 +87,36 @@ from mangoapi import Router
 router = Router(prefix="/hello")
 
 @router.get("/")
-async def say_hello(name: str = "world"):
+async def say_hello(name: str = "world") -> dict[str, str]:
     return {"message": f"Hello {name} 👋"}
 ````
+
+Or if you use Pydantic
+
+```python
+# api/schemas/hello.py
+from pydantic import BaseModel
+
+
+class HelloResponse(BaseModel):
+    message: str
+
+````
+
+```python
+# api/routes/hello.py
+from mangoapi import Router
+
+from api.schemas.hello import HelloResponse
+
+router = Router(prefix="/hello")
+
+@router.get("/")
+async def say_hello(name: str = "world") -> HelloResponse:
+    return {"message": f"Hello {name} 👋"}
+````
+
+**The return type is mandatory!**
 
 6- Run the app
 ```bash
