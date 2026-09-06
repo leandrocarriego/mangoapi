@@ -1,3 +1,8 @@
+> **Status: paused.** I built MangoAPI in 2025 to explore how far Django could be
+> pushed toward a modern async API workflow without leaving the framework behind.
+> It works and the ideas hold up, but I'm not actively developing it. The code is
+> here to read; feel free to fork it.
+
 # 🍋 MangoAPI
 
 **MangoAPI** is a lightweight meta-framework that lets you build modern, clean and asynchronous APIs inside a traditional Django project.
